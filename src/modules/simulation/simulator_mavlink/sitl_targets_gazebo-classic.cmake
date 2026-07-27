@@ -79,6 +79,7 @@ if(gazebo_FOUND)
 		iris
 		iris_dual_gps
 		iris_foggy_lidar
+		iris_livox
 		iris_irlock
 		iris_obs_avoid
 		iris_depth_camera
