@@ -3,3 +3,44 @@
 
 #param set-default MAV_SYS_ID $((px4_instance+1))
 #param set-default IMU_INTEG_RATE 250
+
+# EKF2 position source for this project's Livox SITL model, selected by
+# PX4_POSITION_SOURCE (export it before `make px4_sitl ...`, same convention as
+# PX4_SITL_WORLD — see scripts/setup_env.sh / scripts/launch_test.sh):
+#   fastlio (default) - fuse external vision (FAST-LIO) only, GPS off, so
+#                        /fmu/out/vehicle_local_position IS the FAST-LIO-based
+#                        estimate fly_waypoints.py flies on.
+#   gps               - fuse GPS+baro only (stock PX4 defaults), vision fusion
+#                        off, so control flies on GPS instead. FAST-LIO can
+#                        still run alongside (it doesn't consult these params)
+#                        so /Odometry vs /fmu/out/vehicle_local_position shows
+#                        how far FAST-LIO drifts from GPS "truth" — see
+#                        scripts/analyze_odometry.py.
+# This file is sourced from rcS on every boot.
+if [ "$PX4_SIM_MODEL" = "gazebo-classic_iris_livox" ]; then
+	# LiDAR's translational lever arm off the vehicle CoG, in body FRD — must
+	# match iris_livox.sdf's Livox mount position (-0.13, 0, 0.1 in FLU, i.e.
+	# 13 cm back, 10 cm up). EKF2 subtracts this (rotated by its own attitude
+	# estimate) from the fused vision position, so it needs the raw position
+	# from FAST-LIO's own sensor frame (unmodified by the bridge script) — the
+	# rotational part of the mount offset can't be corrected this way (PX4 has
+	# no fixed-rotation param for external vision), so that part is instead
+	# corrected in scripts/fastlio_to_px4_visual_odom.py before publishing.
+	param set EKF2_EV_POS_X -0.13
+	param set EKF2_EV_POS_Y 0.0
+	param set EKF2_EV_POS_Z -0.1
+
+	if [ "${PX4_POSITION_SOURCE:-fastlio}" = "gps" ]; then
+		param set EKF2_GPS_CTRL 7
+		param set EKF2_EV_CTRL 0
+		param set EKF2_HGT_REF 1
+		param set ATT_EXT_HDG_M 0
+	else
+		param set EKF2_GPS_CTRL 0
+		param set EKF2_EV_CTRL 11
+		param set EKF2_HGT_REF 3
+		param set EKF2_EV_DELAY 0
+		param set ATT_EXT_HDG_M 1
+		param set EKF2_EV_QMIN 0
+	fi
+fi
