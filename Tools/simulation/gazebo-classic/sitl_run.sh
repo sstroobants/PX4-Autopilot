@@ -70,6 +70,15 @@ pkill -x gazebo || true
 export PX4_SIM_MODEL=gazebo-classic_${model}
 export PX4_SIM_WORLD=${world}
 
+# Vehicle spawn pose in world coordinates. Defaults match every existing flat
+# (z=0) world; override via env when a world's usable floor isn't at z=0 (e.g.
+# px4-fastlio-sim's moving_wall_test.world lifts its room well above the
+# ground plane so it can oscillate without dipping into it, so the vehicle
+# needs to spawn correspondingly higher inside it).
+spawn_x=${PX4_SPAWN_X:-1.01}
+spawn_y=${PX4_SPAWN_Y:-0.98}
+spawn_z=${PX4_SPAWN_Z:-0.83}
+
 SIM_PID=0
 
 if [ -x "$(command -v gazebo)" ]; then
@@ -127,7 +136,7 @@ if [ -x "$(command -v gazebo)" ]; then
 		echo "Using: ${modelpath}/${model}/${model}.sdf"
 	fi
 
-	while gz model --verbose --spawn-file="${modelpath}/${model}/${model_name}.sdf" --model-name=${model} -x 1.01 -y 0.98 -z 0.83 2>&1 | grep -q "An instance of Gazebo is not running."; do
+	while gz model --verbose --spawn-file="${modelpath}/${model}/${model_name}.sdf" --model-name=${model} -x $spawn_x -y $spawn_y -z $spawn_z 2>&1 | grep -q "An instance of Gazebo is not running."; do
 		echo "gzserver not ready yet, trying again!"
 		sleep 1
 	done
