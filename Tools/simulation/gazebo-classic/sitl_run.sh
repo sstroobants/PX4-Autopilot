@@ -63,9 +63,12 @@ if [ "$model" == "" ] || [ "$model" == "none" ]; then
 	model="iris"
 fi
 
-# kill process names that might stil
+# kill process names that might still
 # be running from last time
 pkill -x gazebo || true
+pkill -x gzserver || true
+pkill -x gzclient || true
+sleep 1
 
 export PX4_SIM_MODEL=gazebo-classic_${model}
 export PX4_SIM_WORLD=${world}

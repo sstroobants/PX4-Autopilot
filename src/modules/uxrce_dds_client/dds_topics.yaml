@@ -68,6 +68,16 @@ publications:
   - topic: /fmu/out/vehicle_status
     type: px4_msgs::msg::VehicleStatus
 
+  # Position/attitude controller telemetry, for scripts/analyze_odometry.py's
+  # control-performance analysis: the setpoint the position controller actually
+  # tracks (jerk-limited/slewed, so it differs from the /fmu/in/trajectory_setpoint
+  # we send) and the tilt/thrust the attitude loop is asked for (saturation).
+  - topic: /fmu/out/vehicle_local_position_setpoint
+    type: px4_msgs::msg::VehicleLocalPositionSetpoint
+
+  - topic: /fmu/out/vehicle_attitude_setpoint
+    type: px4_msgs::msg::VehicleAttitudeSetpoint
+
   - topic: /fmu/out/vehicle_trajectory_waypoint_desired
     type: px4_msgs::msg::VehicleTrajectoryWaypoint
 
