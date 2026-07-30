@@ -44,3 +44,12 @@ if [ "$PX4_SIM_MODEL" = "gazebo-classic_iris_livox" ]; then
 		param set EKF2_EV_QMIN 0
 	fi
 fi
+
+# Sourced LAST so the file genuinely overrides: the model block above hard-sets
+# EKF2_EV_DELAY/EKF2_EV_CTRL/etc, so anything sourced before it gets silently
+# clobbered (this cost one run's worth of EKF2_EV_DELAY=100 reading back as 0).
+# Generated from a YAML file by scripts/px4_param_config.py; see
+# scripts/launch_test.sh --px4-param-config.
+if [ -n "${PX4_PARAM_OVERRIDE_FILE:-}" ] && [ -f "$PX4_PARAM_OVERRIDE_FILE" ]; then
+	. "$PX4_PARAM_OVERRIDE_FILE"
+fi

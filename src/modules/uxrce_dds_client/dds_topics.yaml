@@ -81,6 +81,24 @@ publications:
   - topic: /fmu/out/vehicle_trajectory_waypoint_desired
     type: px4_msgs::msg::VehicleTrajectoryWaypoint
 
+  # EKF2 aiding diagnostics, for working out how the external vision (FAST-LIO)
+  # measurements are actually being fused. estimator_innovations is the raw
+  # measurement-minus-prediction; estimator_innovation_test_ratios is the same
+  # struct holding the normalised consistency-test ratio, where >1.0 means the
+  # sample was REJECTED by the innovation gate (EKF2_EVP_GATE et al.);
+  # estimator_states is the full state vector incl. accel/gyro bias. Without
+  # these, "EV is fused late" and "EV is gated out" are indistinguishable from
+  # the ROS2 side. Note test_ratios shares px4_msgs::msg::EstimatorInnovations
+  # with the other two innovation topics — that's the uORB type, not a typo.
+  - topic: /fmu/out/estimator_innovations
+    type: px4_msgs::msg::EstimatorInnovations
+
+  - topic: /fmu/out/estimator_innovation_test_ratios
+    type: px4_msgs::msg::EstimatorInnovations
+
+  - topic: /fmu/out/estimator_states
+    type: px4_msgs::msg::EstimatorStates
+
 # Create uORB::Publication
 subscriptions:
   - topic: /fmu/in/register_ext_component_request
